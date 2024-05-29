@@ -1,15 +1,8 @@
-import { Schema, model } from 'mongoose'
+import { Schema, model } from 'mongoose';
 
 const tarefaSchema = new Schema({
-    id: Number,
-    titulo: String,
-    descrição: String,
-    dataConclusao: Date,
-    tipo: String,
-    status: String,
-    usuarioAssociado: String,
-    categoria: String
-
+  title: { type: String, required: true },
+  description: { type: String, required: true }
 }, { timestamps: true });
 
-export default model("Tarefa", tarefaSchema)
+export default model("Tarefa", tarefaSchema);

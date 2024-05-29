@@ -1,10 +1,5 @@
-import app from "./app";
+import app from './app';
 
-
-function main() {
-    app.listen(3001, 'localhost', () => {
-        console.log('Servidor rodando na porta 3001')
-    })
-}
-
-main()
+app.listen(5500, () => {
+  console.log('Servidor rodando na porta 5500');
+});

@@ -1,10 +1,6 @@
-const taskKey = '@tasks';
-
 // Função para adicionar tarefa
-function addTask(event) {
+async function addTask(event) {
   event.preventDefault(); // Evita o recarregamento da página
-  const taskId = new Date().getTime();
-  const taskList = document.querySelector('#taskList');
 
   const form = document.querySelector('#taskForm');
   const formData = new FormData(form);
@@ -12,52 +8,64 @@ function addTask(event) {
   const taskTitle = formData.get('title');
   const taskDescription = formData.get('description');
 
+  console.log('taskTitle:', taskTitle);
+  console.log('taskDescription:', taskDescription);
+
+  try {
+    const response = await fetch('http://localhost:5500/tarefa', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ title: taskTitle, description: taskDescription })
+    });
+    const newTask = await response.json();
+
+    addTaskToDOM(newTask);
+    form.reset();
+  } catch (error) {
+    console.error('Erro ao adicionar tarefa:', error);
+  }
+}
+
+function addTaskToDOM(task) {
+  const taskList = document.querySelector('#taskList');
+
   const li = document.createElement('li');
-  li.id = taskId;
+  li.id = task._id;
   li.innerHTML = `
-    <h2>${taskTitle}</h2>
-    <p>${taskDescription}</p>
-    <button class="editButton" onclick="openEditDialog(${taskId})" title="Editar tarefa">✏️</button>
+    <h2>${task.title}</h2>
+    <p>${task.description}</p>
+    <button class="editButton" onclick="openEditDialog('${task._id}')" title="Editar tarefa">✏️</button>
+    <button class="deleteButton" onclick="deleteTask('${task._id}')" title="Remover tarefa">🗑️</button>
   `;
 
   taskList.appendChild(li);
-
-  // Salvar tarefas no localStorage
-  const tasks = JSON.parse(localStorage.getItem(taskKey)) || [];
-  tasks.push({ id: taskId, title: taskTitle, description: taskDescription });
-  localStorage.setItem(taskKey, JSON.stringify(tasks));
-
-  form.reset();
 }
 
-// Carregar tarefas do localStorage ao recarregar a página
-window.addEventListener('DOMContentLoaded', () => {
-  const tasks = JSON.parse(localStorage.getItem(taskKey)) || [];
-  const taskList = document.querySelector('#taskList');
-  taskList.innerHTML = tasks
-    .map(
-      (task) => `
-      <li id="${task.id}">
-        <h2>${task.title}</h2>
-        <p>${task.description}</p>
-        <button class="editButton" onclick="openEditDialog(${task.id})" title="Editar tarefa">✏️</button>
-      </li>
-    `
-    )
-    .join('');
+// Carregar tarefas do backend ao recarregar a página
+window.addEventListener('DOMContentLoaded', async () => {
+  try {
+    const response = await fetch('http://localhost:5500/tarefas');
+    const tasks = await response.json();
+
+    tasks.forEach(addTaskToDOM);
+  } catch (error) {
+    console.error('Erro ao carregar tarefas:', error);
+  }
 });
 
 // Função para abrir o diálogo de edição
 function openEditDialog(taskId) {
-  const tasks = JSON.parse(localStorage.getItem(taskKey)) || [];
-  const task = tasks.find((t) => t.id === taskId);
-
-  if (task) {
-    document.querySelector('#editTaskId').value = taskId;
-    document.querySelector('#editTitle').value = task.title;
-    document.querySelector('#editDescription').value = task.description;
-    document.querySelector('#editDialog').showModal();
-  }
+  fetch(`http://localhost:5500/tarefa/${taskId}`)
+    .then(response => response.json())
+    .then(task => {
+      document.querySelector('#editTaskId').value = task._id;
+      document.querySelector('#editTitle').value = task.title;
+      document.querySelector('#editDescription').value = task.description;
+      document.querySelector('#editDialog').showModal();
+    })
+    .catch(error => console.error('Erro ao buscar tarefa:', error));
 }
 
 // Função para fechar o diálogo de edição
@@ -66,25 +74,45 @@ function closeEditDialog() {
 }
 
 // Função para editar tarefa
-function editTask(event) {
+async function editTask(event) {
   event.preventDefault();
 
-  const taskId = parseInt(document.querySelector('#editTaskId').value, 10);
+  const taskId = document.querySelector('#editTaskId').value;
   const taskTitle = document.querySelector('#editTitle').value;
   const taskDescription = document.querySelector('#editDescription').value;
 
-  const tasks = JSON.parse(localStorage.getItem(taskKey)) || [];
-  const taskIndex = tasks.findIndex((t) => t.id === taskId);
+  try {
+    const response = await fetch(`http://localhost:5500/tarefa/${taskId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ title: taskTitle, description: taskDescription })
+    });
+    const updatedTask = await response.json();
 
-  if (taskIndex !== -1) {
-    tasks[taskIndex].title = taskTitle;
-    tasks[taskIndex].description = taskDescription;
-    localStorage.setItem(taskKey, JSON.stringify(tasks));
-
-    const li = document.getElementById(taskId);
-    li.querySelector('h2').textContent = taskTitle;
-    li.querySelector('p').textContent = taskDescription;
-
+    updateTaskInDOM(updatedTask);
     closeEditDialog();
+  } catch (error) {
+    console.error('Erro ao editar tarefa:', error);
+  }
+}
+
+function updateTaskInDOM(task) {
+  const li = document.getElementById(task._id);
+  li.querySelector('h2').textContent = task.title;
+  li.querySelector('p').textContent = task.description;
+}
+
+// Função para excluir tarefa
+async function deleteTask(taskId) {
+  try {
+    await fetch(`http://localhost:5500/tarefa/${taskId}`, {
+      method: 'DELETE'
+    });
+
+    document.getElementById(taskId).remove();
+  } catch (error) {
+    console.error('Erro ao remover tarefa:', error);
   }
 }
