@@ -12,7 +12,6 @@
       <h1>Todo List</h1>
     </header>
     <main>
-      <!-- Formulário para adicionar tarefas -->
       <form id="taskForm" onsubmit="addTask(event)">
         <input
           type="text"
@@ -30,13 +29,20 @@
         <button type="submit">Salvar Tarefa</button>
       </form>
 
-      <!-- Lista de tarefas -->
+      <div id="filterContainer">
+        <input
+          type="text"
+          id="filterTitle"
+          placeholder="Filtrar tarefas pelo título"
+        />
+        <button onclick="filterTasks()">Filtrar</button>
+      </div>
+
       <ul id="taskList"></ul>
     </main>
     <footer>&copy; 2024 Todo List</footer>
   </div>
 
-  <!-- Dialog para editar tarefa -->
   <dialog id="editDialog">
     <form id="editForm" onsubmit="editTask(event)">
       <input type="hidden" id="editTaskId" />

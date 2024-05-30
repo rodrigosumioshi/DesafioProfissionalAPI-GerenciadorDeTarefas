@@ -6,5 +6,5 @@ depois acessar a url 'http://127.0.0.1:5500/todo/'
 
 certifique-se de que o MongoDB está conectado no endereço: 'mongodb://127.0.0.1:27017'.
 
-no mongodb vai aparecer tudo na coleção 'tarefas'
+no MongoDB vai aparecer no banco de dados 'natan-ToDo', na coleção 'tarefas'
 

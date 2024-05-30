@@ -1,15 +1,11 @@
-// Função para adicionar tarefa
 async function addTask(event) {
-  event.preventDefault(); // Evita o recarregamento da página
+  event.preventDefault();
 
   const form = document.querySelector('#taskForm');
   const formData = new FormData(form);
 
   const taskTitle = formData.get('title');
   const taskDescription = formData.get('description');
-
-  console.log('taskTitle:', taskTitle);
-  console.log('taskDescription:', taskDescription);
 
   try {
     const response = await fetch('http://localhost:5500/tarefa', {
@@ -43,7 +39,6 @@ function addTaskToDOM(task) {
   taskList.appendChild(li);
 }
 
-// Carregar tarefas do backend ao recarregar a página
 window.addEventListener('DOMContentLoaded', async () => {
   try {
     const response = await fetch('http://localhost:5500/tarefas');
@@ -55,7 +50,6 @@ window.addEventListener('DOMContentLoaded', async () => {
   }
 });
 
-// Função para abrir o diálogo de edição
 function openEditDialog(taskId) {
   fetch(`http://localhost:5500/tarefa/${taskId}`)
     .then(response => response.json())
@@ -68,12 +62,10 @@ function openEditDialog(taskId) {
     .catch(error => console.error('Erro ao buscar tarefa:', error));
 }
 
-// Função para fechar o diálogo de edição
 function closeEditDialog() {
   document.querySelector('#editDialog').close();
 }
 
-// Função para editar tarefa
 async function editTask(event) {
   event.preventDefault();
 
@@ -104,7 +96,6 @@ function updateTaskInDOM(task) {
   li.querySelector('p').textContent = task.description;
 }
 
-// Função para excluir tarefa
 async function deleteTask(taskId) {
   try {
     await fetch(`http://localhost:5500/tarefa/${taskId}`, {
@@ -116,3 +107,19 @@ async function deleteTask(taskId) {
     console.error('Erro ao remover tarefa:', error);
   }
 }
+
+function filterTasks() {
+  const filterInput = document.querySelector('#filterTitle').value.toLowerCase();
+  const tasks = document.querySelectorAll('#taskList li');
+
+  tasks.forEach(task => {
+    const title = task.querySelector('h2').textContent.toLowerCase();
+    if (filterInput === "" || title.includes(filterInput)) {
+      task.style.display = "";
+    } else {
+      task.style.display = "none";
+    }
+  });
+}
+
+document.querySelector('#filterButton').addEventListener('click', filterTasks);
