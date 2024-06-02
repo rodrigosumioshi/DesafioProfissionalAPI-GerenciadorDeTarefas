@@ -1,3 +1,5 @@
+link TUTORIAL DOWNLOAD MONGO DB E TUTORIAL API: https://youtu.be/bNs7B4usOeY
+
 dar o comando 'npm run start' no terminal
 
 rodar o server na porta '5500'
